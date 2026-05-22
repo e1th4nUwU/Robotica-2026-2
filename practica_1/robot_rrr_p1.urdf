@@ -1,0 +1,86 @@
+<robot name="robot_rrr_p1">
+
+  <!-- ===== ESLABONES ===== -->
+
+  <!-- Base: disco cilíndrico fijo al suelo -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.15" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0.025"/>
+      <material name="gris">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabón 1: columna vertical que gira sobre la base -->
+  <link name="link_1">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.3"/>
+      </geometry>
+      <origin xyz="0 0 0.15"/>
+      <material name="cyan">
+        <color rgba="0 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabón 2: brazo horizontal (hombro) -->
+  <link name="link_2">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0.15 0 0"/>
+      <material name="magenta">
+        <color rgba="1 0 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabón 3: antebrazo -->
+  <link name="link_3">
+    <visual>
+      <geometry>
+        <box size="0.25 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0.125 0 0"/>
+      <material name="amarillo">
+        <color rgba="1 1 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- ===== JUNTAS ===== -->
+
+  <!-- Junta 1: rotación alrededor del eje Z — la columna gira sobre la base -->
+  <joint name="joint_1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link_1"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="10.0" velocity="10.0"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Junta 2: rotación en el plano vertical — hombro -->
+  <joint name="joint_2" type="revolute">
+    <parent link="link_1"/>
+    <child link="link_2"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="10.0" velocity="10.0"/>
+    <origin xyz="0 0 0.3" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Junta 3: rotación en el plano vertical — codo -->
+  <joint name="joint_3" type="revolute">
+    <parent link="link_2"/>
+    <child link="link_3"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="10.0" velocity="10.0"/>
+    <origin xyz="0.3 0 0" rpy="0 0 0"/>
+  </joint>
+
+</robot>
