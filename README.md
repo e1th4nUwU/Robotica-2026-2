@@ -10,6 +10,7 @@ Incluye modelos URDF, simulaciones en RViz y notebooks de análisis desarrollado
 | Carpeta | Descripción |
 |:--------|:------------|
 | [`practica_1/`](practica_1/) | Visualización de un modelo URDF en RViz |
+| [`practica_2/`](practica_2/) | Cinemática directa, inversa y trayectoria de un robot RRR |
 
 ---
 
