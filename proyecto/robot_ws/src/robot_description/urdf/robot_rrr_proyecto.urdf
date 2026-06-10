@@ -1,0 +1,82 @@
+<robot name="robot_rrr_proyecto">
+
+  <!-- Base: disco cilindrico fijo al suelo -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.15" length="0.1"/>
+      </geometry>
+      <origin xyz="0 0 0.05"/>
+      <material name="gris">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabon 1: brazo (l1 = 0.3 m) en plano XY -->
+  <link name="shoulder_link">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0.15 0 0"/>
+      <material name="cyan">
+        <color rgba="0 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabon 2: antebrazo (l2 = 0.3 m) en plano XY -->
+  <link name="arm_link">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0.15 0 0"/>
+      <material name="magenta">
+        <color rgba="1 0 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Eslabon 3: muneca (l3 = 0.3 m) en plano XY -->
+  <link name="forearm_link">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0.15 0 0"/>
+      <material name="yellow">
+        <color rgba="1 1 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Junta 1: rotacion alrededor de Z (plano XY) -->
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="shoulder_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="10.0" velocity="10.0"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Junta 2: rotacion alrededor de Z (plano XY) -->
+  <joint name="arm_joint" type="revolute">
+    <parent link="shoulder_link"/>
+    <child link="arm_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="10.0" velocity="10.0"/>
+    <origin xyz="0.3 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Junta 3: rotacion alrededor de Z (plano XY) -->
+  <joint name="forearm_joint" type="revolute">
+    <parent link="arm_link"/>
+    <child link="forearm_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="10.0" velocity="10.0"/>
+    <origin xyz="0.3 0 0" rpy="0 0 0"/>
+  </joint>
+
+</robot>
