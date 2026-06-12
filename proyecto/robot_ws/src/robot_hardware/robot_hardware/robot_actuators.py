@@ -15,11 +15,11 @@ class NodoHardware(Node):
 
         self.js_state = JointState()
         self.js_state.name = ["shoulder_joint", "arm_joint", "forearm_joint"]
-        self.js_state.position = [0.1, 0.1, 0.1]
+        self.js_state.position = [0.1, -1.3, 1.7]
 
         self.js_goal = JointState()
         self.js_goal.name = ["shoulder_joint", "arm_joint", "forearm_joint"]
-        self.js_goal.position = [0.1, 0.1, 0.1]
+        self.js_goal.position = [0.1, -1.3, 1.7]
 
         self.create_timer(0.01, self.hw_callback)
 
