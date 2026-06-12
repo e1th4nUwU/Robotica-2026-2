@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import math
 import rclpy
+import matplotlib.pyplot as plt
 from rclpy.node import Node
 from robot_kinematics.kinematics import Robot
 from geometry_msgs.msg import Twist, PointStamped
@@ -11,6 +11,11 @@ class PublicadorTrayectoria(Node):
     def __init__(self):
         super().__init__("nodo_publicador")
         self.robot = Robot()
+
+        # Altura del plano de trabajo elevado por encima de la base.
+        # El click en RViz da (x, y); la z se fija a este plano para que
+        # el efector final alcance un punto XYZ y las vigas se inclinen.
+        self.plano_z = 1
 
         # Suscriptor para posiciones deseadas (Twist)
         self.sub_twist = self.create_subscription(
@@ -45,7 +50,7 @@ class PublicadorTrayectoria(Node):
                   self.js_current.position[2]),
             xi_f=(msg.linear.x,
                   msg.linear.y,
-                  msg.angular.z))
+                  msg.linear.z))
         self._iniciar_publicacion()
 
     def ps_callback(self, msg: PointStamped):
@@ -54,18 +59,18 @@ class PublicadorTrayectoria(Node):
         self.is_moving = True
         x_f = msg.point.x
         y_f = msg.point.y
-        # Beta apunta el efector final hacia el objetivo para que la barra
-        # amarilla (forearm) rote naturalmente al cambiar de posicion
-        beta_f = math.atan2(y_f, x_f)
+        # El click solo da X,Y; la Z se fija al plano de trabajo elevado.
+        # El efector final alcanza el punto XYZ inclinando las vigas.
+        z_f = msg.point.z
         self.get_logger().info(
-            "Click recibido: x={:.3f}, y={:.3f}, beta_f={:.3f}".format(
-                x_f, y_f, beta_f))
+            "Click recibido: x={:.3f}, y={:.3f}, z={:.3f}".format(
+                x_f, y_f, z_f))
         self.robot.def_tray(
             t_f=3, frec=20,
             th_i=(self.js_current.position[0],
                   self.js_current.position[1],
                   self.js_current.position[2]),
-            xi_f=(x_f, y_f, beta_f))
+            xi_f=(x_f, y_f, z_f))
         self._iniciar_publicacion()
 
     def _iniciar_publicacion(self):
@@ -73,6 +78,13 @@ class PublicadorTrayectoria(Node):
             self.robot.xi_m[:, self.robot.muestras - 1]))
         self.get_logger().info("Posicion final juntas: {}".format(
             self.robot.th_m[:, self.robot.muestras - 1]))
+        # Popup con las graficas al terminar de calcular la trayectoria.
+        # Cierra las anteriores y muestra sin bloquear, para que el robot
+        # se mueva mientras las ventanas quedan visibles.
+        plt.close("all")
+        self.robot.imp_tray(block=False)
+        self.robot.imp_junt(block=False)
+        plt.pause(0.001)
         self.current_pos = 0
         self.timer_pub = self.create_timer(self.robot.dt, self.timer_pub_callback)
 
@@ -83,6 +95,8 @@ class PublicadorTrayectoria(Node):
             float(self.robot.th_m[1, self.current_pos]),
             float(self.robot.th_m[2, self.current_pos])]
         self.js_pub.publish(self.joint_state_msg)
+        # Mantiene vivas las ventanas de las graficas mientras el robot se mueve
+        plt.pause(0.001)
         self.current_pos += 1
         if self.current_pos == (self.robot.muestras - 1):
             self.is_moving = False
