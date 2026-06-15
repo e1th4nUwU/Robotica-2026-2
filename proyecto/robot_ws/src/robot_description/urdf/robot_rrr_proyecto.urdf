@@ -1,6 +1,6 @@
 <robot name="robot_rrr_proyecto">
 
-  <!-- Base: disco cilindrico fijo al suelo + columna que eleva el plano de trabajo -->
+  <!-- Base: disco cilindrico fijo al suelo + columna que eleva el brazo -->
   <link name="base_link">
     <visual>
       <geometry>
@@ -62,12 +62,14 @@
     </visual>
   </link>
 
-  <!-- Junta 1: yaw alrededor de Z (orienta el brazo en el plano XY) -->
-  <joint name="shoulder_joint" type="revolute">
+  <!-- Junta 1: yaw alrededor de Z (gira el eslabon cyan, orienta en XY).
+       CONTINUA: gira 360 grados libre, sin limite, para alcanzar cualquier
+       direccion por el camino mas corto sin atorarse en +-pi. -->
+  <joint name="shoulder_joint" type="continuous">
     <parent link="base_link"/>
     <child link="shoulder_link"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper="3.14" effort="10.0" velocity="10.0"/>
+    <limit effort="10.0" velocity="10.0"/>
     <origin xyz="0 0 0.3" rpy="0 0 0"/>
   </joint>
 
@@ -80,7 +82,7 @@
     <origin xyz="0.3 0 0" rpy="0 0 0"/>
   </joint>
 
-  <!-- Junta 3: pitch alrededor de Y (inclina la viga amarilla, sube/baja) -->
+  <!-- Junta 3: pitch alrededor de Y (inclina la viga amarilla, codo) -->
   <joint name="forearm_joint" type="revolute">
     <parent link="arm_link"/>
     <child link="forearm_link"/>
