@@ -15,7 +15,8 @@ class PublicadorTrayectoria(Node):
         # Altura del plano de trabajo elevado por encima de la base.
         # El click en RViz da (x, y); la z se fija a este plano para que
         # el efector final alcance un punto XYZ y las vigas se inclinen.
-        self.plano_z = 1
+        # Debe ser alcanzable: el robot llega hasta z=0.9 m.
+        self.plano_z = 0.6
 
         # Suscriptor para posiciones deseadas (Twist)
         self.sub_twist = self.create_subscription(
@@ -59,9 +60,10 @@ class PublicadorTrayectoria(Node):
         self.is_moving = True
         x_f = msg.point.x
         y_f = msg.point.y
-        # El click solo da X,Y; la Z se fija al plano de trabajo elevado.
-        # El efector final alcanza el punto XYZ inclinando las vigas.
-        z_f = msg.point.z
+        # El click solo da X,Y (RViz proyecta sobre el suelo z=0); la Z se
+        # fija al plano de trabajo elevado para que el efector final alcance
+        # el punto XYZ inclinando las vigas.
+        z_f = self.plano_z
         self.get_logger().info(
             "Click recibido: x={:.3f}, y={:.3f}, z={:.3f}".format(
                 x_f, y_f, z_f))
@@ -74,10 +76,21 @@ class PublicadorTrayectoria(Node):
         self._iniciar_publicacion()
 
     def _iniciar_publicacion(self):
-        self.get_logger().info("Posicion final EF: {}".format(
-            self.robot.xi_m[:, self.robot.muestras - 1]))
-        self.get_logger().info("Posicion final juntas: {}".format(
-            self.robot.th_m[:, self.robot.muestras - 1]))
+        # EF REAL: cinematica directa de las juntas finales (no la
+        # trayectoria deseada). Asi se ve si el brazo de verdad llego.
+        n = self.robot.muestras - 1
+        th_f = self.robot.th_m[:, n]
+        ef_real = self.robot.fk_num(
+            float(th_f[0]), float(th_f[1]), float(th_f[2])).flatten()
+        objetivo = self.robot.xi_m[:, n]
+        gap = float(((ef_real - objetivo) ** 2).sum() ** 0.5)
+        self.get_logger().info("EF objetivo: {}".format(objetivo))
+        self.get_logger().info("EF alcanzado (FK real): {}".format(ef_real))
+        if gap > 0.01:
+            self.get_logger().warn(
+                "Punto fuera de alcance: el brazo quedo a {:.3f} m del "
+                "objetivo (se estiro lo maximo posible).".format(gap))
+        self.get_logger().info("Posicion final juntas: {}".format(th_f))
         # Popup con las graficas al terminar de calcular la trayectoria.
         # Cierra las anteriores y muestra sin bloquear, para que el robot
         # se mueva mientras las ventanas quedan visibles.
